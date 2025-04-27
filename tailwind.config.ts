@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -122,7 +121,10 @@ export default {
 						transform: 'scale(1)',
 						opacity: '1'
 					}
-				}
+				},
+        "fade-up": "fadeUp 0.5s ease-out",
+        "fade-down": "fadeDown 0.5s ease-out",
+        "scale-up": "scaleUp 0.3s ease-out",
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
@@ -130,9 +132,12 @@ export default {
 				'fade-in': 'fade-in 0.4s ease-out',
 				'fade-out': 'fade-out 0.4s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
-				'enter': 'fade-in 0.4s ease-out, scale-in 0.3s ease-out'
+				'enter': 'fade-in 0.4s ease-out, scale-in 0.3s ease-out',
+        "fade-up": "fadeUp 0.5s ease-out",
+        "fade-down": "fadeDown 0.5s ease-out",
+        "scale-up": "scaleUp 0.3s ease-out",
 			}
-		}
+		},
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
