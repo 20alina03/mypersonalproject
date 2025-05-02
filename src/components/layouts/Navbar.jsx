@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Menu,
@@ -33,6 +33,7 @@ const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const { user, isAuthenticated, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -50,7 +51,10 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = async () => {
-    await logout();
+    const success = await logout();
+    if (success) {
+      navigate("/");
+    }
   };
 
   const navLinks = [
