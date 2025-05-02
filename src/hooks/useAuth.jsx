@@ -1,7 +1,8 @@
 
 import { createContext, useContext, useState } from 'react';
 import { mockCurrentUser } from '@/lib/mockData';
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext(undefined);
 
@@ -9,16 +10,21 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(mockCurrentUser);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const login = async (email, password) => {
     setIsLoading(true);
     try {
       // Mock login functionality - would connect to backend in real app
       console.log(`Logging in with ${email}`);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
       setUser(mockCurrentUser);
       toast({
         title: "Welcome back!",
-        description: "You've successfully logged in.",
+        description: "You've successfully logged in to Atlas.",
         variant: "default",
       });
       return true;
@@ -39,11 +45,14 @@ export function AuthProvider({ children }) {
     setIsLoading(true);
     try {
       // Mock logout functionality
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       setUser(null);
       toast({
         title: "Logged out",
         description: "You've been successfully logged out.",
       });
+      navigate("/");
       return true;
     } catch (error) {
       console.error("Logout error:", error);
@@ -63,6 +72,10 @@ export function AuthProvider({ children }) {
     try {
       // Mock registration functionality
       console.log(`Registering user: ${name} (${email})`);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       setUser({
         ...mockCurrentUser,
         name,
@@ -70,7 +83,7 @@ export function AuthProvider({ children }) {
       });
       toast({
         title: "Registration successful!",
-        description: "Welcome to Atlas. Your account has been created.",
+        description: "Welcome to Atlas. Your journey begins now!",
       });
       return true;
     } catch (error) {

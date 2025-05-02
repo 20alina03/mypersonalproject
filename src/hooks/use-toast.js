@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 const TOAST_LIMIT = 1
@@ -101,7 +102,7 @@ function dispatch(action) {
   })
 }
 
-function toast(props) {
+function toast({ ...props }) {
   const id = genId()
 
   const update = (props) =>

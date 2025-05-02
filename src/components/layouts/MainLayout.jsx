@@ -17,7 +17,7 @@ const MainLayout = ({ children }) => {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
-            className="flex-1 p-4 md:p-6"
+            className="flex-1 p-4 md:p-6 overflow-hidden"
           >
             <AnimatePresence mode="wait">
               {children}
