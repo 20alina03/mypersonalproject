@@ -10,21 +10,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(mockCurrentUser);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-  // We'll use a function to get the navigate function only when needed
-  // This avoids calling useNavigate() during component initialization
-  let navigateRef = null;
-
-  const getNavigate = () => {
-    // This ensures we only use navigate when it's available within a Router context
-    if (!navigateRef) {
-      try {
-        navigateRef = useNavigate();
-      } catch (error) {
-        console.warn("Navigation not available");
-      }
-    }
-    return navigateRef;
-  };
+  const navigate = useNavigate();
 
   const login = async (email, password) => {
     setIsLoading(true);
@@ -67,11 +53,7 @@ export function AuthProvider({ children }) {
         description: "You've been successfully logged out.",
       });
       
-      const navigate = getNavigate();
-      if (navigate) {
-        navigate("/");
-      }
-      
+      navigate("/");
       return true;
     } catch (error) {
       console.error("Logout error:", error);

@@ -33,7 +33,7 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 173 49% 39%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     /* Sidebar colors */
     --sidebar-background: 210 33% 24%;
@@ -90,6 +90,7 @@
   /* Custom scrollbar */
   ::-webkit-scrollbar {
     width: 8px;
+    height: 8px;
   }
   
   ::-webkit-scrollbar-track {
@@ -106,15 +107,30 @@
     background: hsl(var(--primary));
     opacity: 0.8;
   }
+
+  /* Form animations */
+  input, textarea, select {
+    @apply transition-all duration-300;
+  }
+
+  /* Button hover animations */
+  button {
+    @apply transition-all duration-200;
+  }
+
+  /* Link animations */
+  a {
+    @apply transition-colors duration-200;
+  }
 }
 
 @layer components {
   .journal-card {
-    @apply relative overflow-hidden rounded-lg border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md;
+    @apply relative overflow-hidden rounded-xl border bg-card text-card-foreground shadow-md transition-all hover:shadow-lg hover:-translate-y-1 duration-300;
   }
   
   .map-container {
-    @apply h-96 w-full rounded-lg overflow-hidden border border-border;
+    @apply h-96 w-full rounded-xl overflow-hidden border border-border shadow-md;
   }
 
   .avatar-ring {
@@ -122,7 +138,27 @@
   }
 
   .tag-pill {
-    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer;
+    @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 cursor-pointer hover:bg-muted;
+  }
+
+  .btn-atlas {
+    @apply bg-gradient-to-r from-atlas-teal to-atlas-lightblue text-white hover:from-atlas-teal/90 hover:to-atlas-lightblue/90 rounded-xl shadow-md hover:shadow-lg transition-all duration-300;
+  }
+
+  .input-atlas {
+    @apply rounded-xl border-2 focus:border-atlas-teal hover:border-atlas-teal/50 transition-all duration-200;
+  }
+
+  .card-atlas {
+    @apply rounded-xl border shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 bg-white;
+  }
+
+  .sidebar-item-active {
+    @apply bg-atlas-teal/10 text-atlas-teal font-medium relative;
+  }
+
+  .sidebar-item {
+    @apply hover:bg-atlas-teal/5 transition-colors duration-200 rounded-xl;
   }
 }
 
@@ -130,4 +166,46 @@
 .hero-pattern {
   background-color: #ffffff;
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232a9d8f' fill-opacity='0.08'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.animate-enter {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+.animate-fade {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-pulse-soft {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+/* Glass morphism effect */
+.glass-morphism {
+  @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-lg;
+}
+
+.dark .glass-morphism {
+  @apply bg-slate-900/70 backdrop-blur-lg border border-white/10 shadow-lg;
+}
+
+/* Gradient text */
+.text-gradient {
+  @apply bg-gradient-to-r from-atlas-teal to-atlas-navy bg-clip-text text-transparent;
 }
