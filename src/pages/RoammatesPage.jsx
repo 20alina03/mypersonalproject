@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Search, UserPlus, UserCheck, Users, MapPin } from "lucide-react";
 import RoammateCard from "@/components/social/RoammateCard";
 import { toast } from "@/hooks/use-toast";
