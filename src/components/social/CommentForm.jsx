@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { SendHorizontal } from "lucide-react";
 
-const CommentForm = ({ entryId, onCommentAdded }) => {
+const CommentForm = ({ entryId, onCommentAdded, id }) => {
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -50,12 +50,13 @@ const CommentForm = ({ entryId, onCommentAdded }) => {
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 flex gap-3">
-      <Avatar className="h-8 w-8 bg-white">
+      <Avatar className="h-8 w-8">
         <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
         <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
       </Avatar>
       <div className="flex-1 space-y-2">
         <Textarea
+          id={id}
           placeholder="Share your thoughts..."
           value={comment}
           onChange={(e) => setComment(e.target.value)}

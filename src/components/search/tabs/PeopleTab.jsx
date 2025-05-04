@@ -22,6 +22,10 @@ const PeopleTab = ({ users }) => {
   const viewAllRoammates = () => {
     navigate('/roammates');
   };
+  
+  const viewFeed = () => {
+    navigate('/roammates-feed');
+  };
 
   return (
     <>
@@ -33,12 +37,15 @@ const PeopleTab = ({ users }) => {
         </div>
       ) : (
         <>
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-medium">Travel Companions</h3>
               <Badge variant="outline" className="bg-primary/5">{users.length} found</Badge>
             </div>
-            <Button variant="outline" onClick={viewAllRoammates}>View All Roammates</Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={viewAllRoammates}>All Roammates</Button>
+              <Button variant="default" onClick={viewFeed}>View Feed</Button>
+            </div>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

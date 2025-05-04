@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import MainLayout from "@/components/layouts/MainLayout";
@@ -6,7 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { MapPin, Heart, MessageSquare, Share, UserPlus, Users } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Heart, MessageSquare, Share, UserPlus, Users, Loader2 } from "lucide-react";
 import { formatDistance } from 'date-fns';
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
@@ -25,37 +27,45 @@ const RoammatesFeedPage = () => {
   const [postComments, setPostComments] = useState({});
   const [likedPosts, setLikedPosts] = useState([]);
   const [activeTab, setActiveTab] = useState("all");
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    // Get roammates IDs for the current user
-    const userRoammateIds = currentUser.roammatesData.roammates;
+    // Show loading state
+    setIsLoading(true);
     
-    // Filter posts based on active tab
-    let posts;
-    if (activeTab === "roammates") {
-      posts = journalEntries.filter(entry => 
-        userRoammateIds.includes(entry.author.id)
-      );
-    } else {
-      // All posts, but prioritize roammates
-      posts = [...journalEntries].sort((a, b) => {
-        const aIsRoammate = userRoammateIds.includes(a.author.id);
-        const bIsRoammate = userRoammateIds.includes(b.author.id);
-        
-        if (aIsRoammate && !bIsRoammate) return -1;
-        if (!aIsRoammate && bIsRoammate) return 1;
-        return new Date(b.date) - new Date(a.date); // Most recent first
+    // Simulating API delay
+    setTimeout(() => {
+      // Get roammates IDs for the current user
+      const userRoammateIds = currentUser.roammatesData.roammates;
+      
+      // Filter posts based on active tab
+      let posts;
+      if (activeTab === "roammates") {
+        posts = journalEntries.filter(entry => 
+          userRoammateIds.includes(entry.author.id)
+        );
+      } else {
+        // All posts, but prioritize roammates
+        posts = [...journalEntries].sort((a, b) => {
+          const aIsRoammate = userRoammateIds.includes(a.author.id);
+          const bIsRoammate = userRoammateIds.includes(b.author.id);
+          
+          if (aIsRoammate && !bIsRoammate) return -1;
+          if (!aIsRoammate && bIsRoammate) return 1;
+          return new Date(b.date) - new Date(a.date); // Most recent first
+        });
+      }
+      
+      setFeedPosts(posts);
+      
+      // Initialize comments for each post
+      const commentsMap = {};
+      posts.forEach(post => {
+        commentsMap[post.id] = comments.filter(comment => comment.entryId === post.id);
       });
-    }
-    
-    setFeedPosts(posts);
-    
-    // Initialize comments for each post
-    const commentsMap = {};
-    posts.forEach(post => {
-      commentsMap[post.id] = comments.filter(comment => comment.entryId === post.id);
-    });
-    setPostComments(commentsMap);
+      setPostComments(commentsMap);
+      setIsLoading(false);
+    }, 800);
   }, [activeTab]);
   
   const handleLikePost = (postId) => {
@@ -162,7 +172,7 @@ const RoammatesFeedPage = () => {
                   .map((user) => (
                     <div key={user.id} className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8 bg-white">
+                        <Avatar className="h-8 w-8">
                           <AvatarImage src={user.avatar} alt={user.name} />
                           <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                         </Avatar>
@@ -202,7 +212,12 @@ const RoammatesFeedPage = () => {
               </TabsList>
             </Tabs>
             
-            {feedPosts.length === 0 ? (
+            {isLoading ? (
+              <div className="text-center py-20">
+                <Loader2 size={48} className="mx-auto text-primary animate-spin mb-4" />
+                <h3 className="text-lg font-medium">Loading feed...</h3>
+              </div>
+            ) : feedPosts.length === 0 ? (
               <Card className="text-center py-12">
                 <CardContent>
                   <MessageSquare size={48} className="mx-auto text-muted-foreground mb-4" />
@@ -230,7 +245,7 @@ const RoammatesFeedPage = () => {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <Avatar 
-                              className="h-10 w-10 bg-white cursor-pointer" 
+                              className="h-10 w-10 cursor-pointer" 
                               onClick={() => handleViewProfile(post.author.id)}
                             >
                               <AvatarImage src={post.author.avatar} alt={post.author.name} />
@@ -351,7 +366,7 @@ const RoammatesFeedPage = () => {
                               {postComments[post.id].map((comment) => (
                                 <div key={comment.id} className="flex gap-3">
                                   <Avatar 
-                                    className="h-8 w-8 bg-white" 
+                                    className="h-8 w-8 cursor-pointer" 
                                     onClick={() => handleViewProfile(comment.userId)}
                                   >
                                     <AvatarImage src={comment.userAvatar} alt={comment.userName} />

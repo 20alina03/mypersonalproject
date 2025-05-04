@@ -16,6 +16,8 @@ import { useNavigate } from 'react-router-dom';
 const currentUser = {
   id: "user1",
   name: "Alex Johnson",
+  location: "San Francisco, CA",
+  travelInterests: ["Hiking", "Photography", "Cultural Experiences"],
   roammatesData: roammates[0]
 };
 
@@ -24,43 +26,51 @@ const RoammatesPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilters, setActiveFilters] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   
   // Filter users based on search query and active filters
   useEffect(() => {
-    let result = users.filter(user => 
-      user.id !== currentUser.id && 
-      (user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      user.username?.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
+    setIsSearching(true);
     
-    if (activeFilters.includes('Same City')) {
-      result = result.filter(user => 
-        user.location && user.location.includes('San Francisco')
+    // Simulating API call with delay
+    const timer = setTimeout(() => {
+      let result = users.filter(user => 
+        user.id !== currentUser.id && 
+        (user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        user.username?.toLowerCase().includes(searchQuery.toLowerCase()))
       );
-    }
+      
+      if (activeFilters.includes('Same City')) {
+        result = result.filter(user => 
+          user.location && user.location.includes('San Francisco')
+        );
+      }
+      
+      if (activeFilters.includes('Similar Interests')) {
+        result = result.filter(user => 
+          user.travelInterests?.some(interest => 
+            currentUser.travelInterests.includes(interest)
+          )
+        );
+      }
+      
+      if (activeFilters.includes('Recently Active')) {
+        // Sort by most recent join date as a proxy for activity
+        result = [...result].sort((a, b) => 
+          new Date(b.joinedDate) - new Date(a.joinedDate)
+        );
+      }
+      
+      if (activeFilters.includes('Visited Same Places')) {
+        // Mock implementation - in a real app we'd check for overlap in visited places
+        result = result.filter(user => user.placesVisited > 15);
+      }
+      
+      setFilteredUsers(result);
+      setIsSearching(false);
+    }, 500);
     
-    if (activeFilters.includes('Similar Interests')) {
-      const currentUserInterests = users.find(u => u.id === currentUser.id)?.travelInterests || [];
-      result = result.filter(user => 
-        user.travelInterests?.some(interest => 
-          currentUserInterests.includes(interest)
-        )
-      );
-    }
-    
-    if (activeFilters.includes('Recently Active')) {
-      // Sort by most recent join date as a proxy for activity
-      result = [...result].sort((a, b) => 
-        new Date(b.joinedDate) - new Date(a.joinedDate)
-      );
-    }
-    
-    if (activeFilters.includes('Visited Same Places')) {
-      // Mock implementation - in a real app we'd check for overlap in visited places
-      result = result.filter(user => user.placesVisited > 15);
-    }
-    
-    setFilteredUsers(result);
+    return () => clearTimeout(timer);
   }, [searchQuery, activeFilters]);
   
   const connectedRoammates = users.filter(user => 
@@ -101,6 +111,17 @@ const RoammatesPage = () => {
     } else {
       setActiveFilters([...activeFilters, filter]);
     }
+    
+    // Notify user of filter change
+    toast({
+      title: activeFilters.includes(filter) ? "Filter Removed" : "Filter Applied",
+      description: `${filter} filter has been ${activeFilters.includes(filter) ? "removed" : "applied"}`,
+      duration: 1500,
+    });
+  };
+  
+  const handleFindRoammates = () => {
+    navigate('/search?tab=people');
   };
   
   return (
@@ -118,7 +139,7 @@ const RoammatesPage = () => {
               Connect with fellow travelers and share your journeys
             </p>
           </div>
-          <Button className="flex items-center gap-2" onClick={() => navigate('/search?tab=people')}>
+          <Button className="flex items-center gap-2" onClick={handleFindRoammates}>
             <UserPlus size={18} />
             <span>Find Roammates</span>
           </Button>
@@ -187,7 +208,7 @@ const RoammatesPage = () => {
                 <Users size={48} className="mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">No Roammates Yet</h3>
                 <p className="text-muted-foreground mb-4">Connect with other travelers to start sharing experiences</p>
-                <Button onClick={() => navigate('/search?tab=people')}>Find Roammates</Button>
+                <Button onClick={handleFindRoammates}>Find Roammates</Button>
               </motion.div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -242,21 +263,39 @@ const RoammatesPage = () => {
           
           <TabsContent value="suggested">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {suggestedRoammates.map((user, index) => (
-                <motion.div
-                  key={user.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.1 }}
-                >
-                  <RoammateCard 
-                    user={user} 
-                    connectionStatus="suggested" 
-                    onConnect={() => handleConnect(user.id, user.name)}
-                  />
-                </motion.div>
-              ))}
-              {suggestedRoammates.length === 0 && (
+              {isSearching ? (
+                // Show loading skeletons while searching
+                Array(6).fill(0).map((_, index) => (
+                  <Card key={index} className="h-64 animate-pulse">
+                    <div className="h-16 bg-muted/50"></div>
+                    <div className="p-4">
+                      <div className="w-1/2 h-4 bg-muted/50 mb-2 rounded"></div>
+                      <div className="w-1/4 h-3 bg-muted/30 mb-4 rounded"></div>
+                      <div className="flex gap-1">
+                        {[1, 2].map(i => (
+                          <div key={i} className="h-6 w-16 bg-muted/30 rounded"></div>
+                        ))}
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              ) : (
+                suggestedRoammates.map((user, index) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <RoammateCard 
+                      user={user} 
+                      connectionStatus="suggested" 
+                      onConnect={() => handleConnect(user.id, user.name)}
+                    />
+                  </motion.div>
+                ))
+              )}
+              {!isSearching && suggestedRoammates.length === 0 && (
                 <motion.div 
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}

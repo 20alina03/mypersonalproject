@@ -45,7 +45,7 @@ const RoammateCard = ({ user, connectionStatus, onConnect, onAccept }) => {
       <CardContent className="p-0">
         <div className="h-16 bg-gradient-to-r from-primary/20 to-secondary/20"></div>
         <div className="px-4 pt-0 pb-4 relative">
-          <Avatar className="h-20 w-20 border-4 border-background bg-white absolute -top-10">
+          <Avatar className="h-20 w-20 border-4 border-background absolute -top-10">
             <AvatarImage src={user.avatar || '/placeholder.svg'} alt={user.name} />
             <AvatarFallback className="text-lg bg-primary/10 text-primary">
               {generateInitials(user.name)}

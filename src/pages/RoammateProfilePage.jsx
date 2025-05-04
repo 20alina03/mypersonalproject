@@ -21,32 +21,39 @@ const RoammateProfilePage = () => {
   const [userPosts, setUserPosts] = useState([]);
   const [entryComments, setEntryComments] = useState({});
   const [likedPosts, setLikedPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
-    // Fetch user data
-    const foundUser = users.find(u => u.id === userId);
-    if (foundUser) {
-      setUser(foundUser);
-      
-      // Fetch user's journal entries
-      const userEntries = journalEntries.filter(entry => entry.author.id === userId);
-      setUserPosts(userEntries);
-      
-      // Initialize comments for each entry
-      const commentsMap = {};
-      userEntries.forEach(entry => {
-        commentsMap[entry.id] = comments.filter(comment => comment.entryId === entry.id);
-      });
-      setEntryComments(commentsMap);
-    } else {
-      // Redirect if user not found
-      navigate('/roammates');
-      toast({
-        title: "User not found",
-        description: "The requested user profile could not be found.",
-        variant: "destructive"
-      });
-    }
+    setLoading(true);
+    
+    // Simulate API fetch delay
+    setTimeout(() => {
+      // Fetch user data
+      const foundUser = users.find(u => u.id === userId);
+      if (foundUser) {
+        setUser(foundUser);
+        
+        // Fetch user's journal entries
+        const userEntries = journalEntries.filter(entry => entry.author.id === userId);
+        setUserPosts(userEntries);
+        
+        // Initialize comments for each entry
+        const commentsMap = {};
+        userEntries.forEach(entry => {
+          commentsMap[entry.id] = comments.filter(comment => comment.entryId === entry.id);
+        });
+        setEntryComments(commentsMap);
+      } else {
+        // Redirect if user not found
+        navigate('/roammates');
+        toast({
+          title: "User not found",
+          description: "The requested user profile could not be found.",
+          variant: "destructive"
+        });
+      }
+      setLoading(false);
+    }, 500);
   }, [userId, navigate]);
   
   const handleConnect = () => {
@@ -96,12 +103,25 @@ const RoammateProfilePage = () => {
     });
   };
   
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="container py-20 text-center">
+          <User size={64} className="mx-auto text-muted-foreground mb-4 animate-pulse" />
+          <h2 className="text-2xl font-bold mb-2">Loading Profile...</h2>
+        </div>
+      </MainLayout>
+    );
+  }
+  
   if (!user) {
     return (
       <MainLayout>
         <div className="container py-20 text-center">
           <User size={64} className="mx-auto text-muted-foreground mb-4" />
-          <h2 className="text-2xl font-bold mb-2">Loading Profile...</h2>
+          <h2 className="text-2xl font-bold mb-2">User Not Found</h2>
+          <p className="mb-4">We couldn't find the roammate you're looking for.</p>
+          <Button onClick={() => navigate('/roammates')}>Back to Roammates</Button>
         </div>
       </MainLayout>
     );
@@ -119,9 +139,9 @@ const RoammateProfilePage = () => {
         <div className="relative">
           <div className="h-48 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-xl"></div>
           <div className="absolute -bottom-16 left-8 border-4 border-background rounded-full">
-            <Avatar className="h-32 w-32 bg-white">
+            <Avatar className="h-32 w-32">
               <AvatarImage src={user.avatar || '/placeholder.svg'} alt={user.name} />
-              <AvatarFallback className="text-4xl">{user.name.charAt(0)}</AvatarFallback>
+              <AvatarFallback className="text-4xl bg-primary/10">{user.name.charAt(0)}</AvatarFallback>
             </Avatar>
           </div>
           <div className="absolute bottom-4 right-4 space-x-2">
@@ -192,6 +212,14 @@ const RoammateProfilePage = () => {
                 </div>
               </CardContent>
             </Card>
+            
+            <Button 
+              variant="outline" 
+              className="w-full" 
+              onClick={() => navigate('/roammates-feed')}
+            >
+              Back to Feed
+            </Button>
           </div>
           
           {/* Right Column - Content */}
@@ -225,7 +253,7 @@ const RoammateProfilePage = () => {
                           <CardHeader>
                             <div className="flex items-start justify-between">
                               <div className="flex items-center gap-3">
-                                <Avatar className="h-10 w-10 bg-white">
+                                <Avatar className="h-10 w-10">
                                   <AvatarImage src={post.author.avatar} alt={post.author.name} />
                                   <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
                                 </Avatar>
@@ -305,7 +333,7 @@ const RoammateProfilePage = () => {
                             <div className="border-t pt-4">
                               {entryComments[post.id]?.map((comment) => (
                                 <div key={comment.id} className="flex gap-3 mb-4">
-                                  <Avatar className="h-8 w-8 bg-white">
+                                  <Avatar className="h-8 w-8">
                                     <AvatarImage src={comment.userAvatar} alt={comment.userName} />
                                     <AvatarFallback>{comment.userName.charAt(0)}</AvatarFallback>
                                   </Avatar>
