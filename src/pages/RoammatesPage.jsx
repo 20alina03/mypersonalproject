@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Search, UserPlus, UserCheck, Users } from "lucide-react";
 import RoammateCard from "@/components/social/RoammateCard";
 import { toast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
 
 // Mock user for the current profile
 const currentUser = {
@@ -62,7 +63,12 @@ const RoammatesPage = () => {
   
   return (
     <MainLayout>
-      <div className="container py-6 space-y-6">
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="container py-6 space-y-6"
+      >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold tracking-tight">Roammates</h1>
@@ -70,13 +76,20 @@ const RoammatesPage = () => {
               Connect with fellow travelers and share your journeys
             </p>
           </div>
-          <Button className="flex items-center gap-2">
-            <UserPlus size={18} />
-            <span>Find Roammates</span>
+          <Button className="flex items-center gap-2" asChild>
+            <a href="/search?tab=people">
+              <UserPlus size={18} />
+              <span>Find Roammates</span>
+            </a>
           </Button>
         </div>
         
-        <div className="bg-card shadow rounded-xl p-6 mb-6">
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="bg-card shadow rounded-xl p-6 mb-6"
+        >
           <div className="relative">
             <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
             <Input
@@ -93,7 +106,7 @@ const RoammatesPage = () => {
             <Badge className="bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer">Recently Active</Badge>
             <Badge className="bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer">Visited Same Places</Badge>
           </div>
-        </div>
+        </motion.div>
         
         <Tabs defaultValue="connections" className="w-full">
           <TabsList className="mb-4">
@@ -115,20 +128,33 @@ const RoammatesPage = () => {
           
           <TabsContent value="connections">
             {connectedRoammates.length === 0 ? (
-              <div className="text-center py-12">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="text-center py-12"
+              >
                 <Users size={48} className="mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">No Roammates Yet</h3>
                 <p className="text-muted-foreground mb-4">Connect with other travelers to start sharing experiences</p>
-                <Button>Find Roammates</Button>
-              </div>
+                <Button asChild>
+                  <a href="/search?tab=people">Find Roammates</a>
+                </Button>
+              </motion.div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {connectedRoammates.map(user => (
-                  <RoammateCard 
-                    key={user.id} 
-                    user={user} 
-                    connectionStatus="connected" 
-                  />
+                {connectedRoammates.map((user, index) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <RoammateCard 
+                      user={user} 
+                      connectionStatus="connected" 
+                    />
+                  </motion.div>
                 ))}
               </div>
             )}
@@ -136,20 +162,31 @@ const RoammatesPage = () => {
           
           <TabsContent value="pending">
             {pendingRoammates.length === 0 ? (
-              <div className="text-center py-12">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="text-center py-12"
+              >
                 <UserPlus size={48} className="mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">No Pending Requests</h3>
                 <p className="text-muted-foreground mb-4">You don't have any pending roammate requests</p>
-              </div>
+              </motion.div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {pendingRoammates.map(user => (
-                  <RoammateCard 
-                    key={user.id} 
-                    user={user} 
-                    connectionStatus="pending" 
-                    onAccept={() => handleAccept(user.id, user.name)}
-                  />
+                {pendingRoammates.map((user, index) => (
+                  <motion.div
+                    key={user.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                  >
+                    <RoammateCard 
+                      user={user} 
+                      connectionStatus="pending" 
+                      onAccept={() => handleAccept(user.id, user.name)}
+                    />
+                  </motion.div>
                 ))}
               </div>
             )}
@@ -157,18 +194,24 @@ const RoammatesPage = () => {
           
           <TabsContent value="suggested">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {suggestedRoammates.map(user => (
-                <RoammateCard 
-                  key={user.id} 
-                  user={user} 
-                  connectionStatus="suggested" 
-                  onConnect={() => handleConnect(user.id, user.name)}
-                />
+              {suggestedRoammates.map((user, index) => (
+                <motion.div
+                  key={user.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3, delay: index * 0.1 }}
+                >
+                  <RoammateCard 
+                    user={user} 
+                    connectionStatus="suggested" 
+                    onConnect={() => handleConnect(user.id, user.name)}
+                  />
+                </motion.div>
               ))}
             </div>
           </TabsContent>
         </Tabs>
-      </div>
+      </motion.div>
     </MainLayout>
   );
 };
