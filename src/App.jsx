@@ -10,6 +10,8 @@ import JournalPage from "./pages/JournalPage";
 import JournalEntryPage from "./pages/JournalEntryPage";
 import ProfilePage from "./pages/ProfilePage";
 import RoammatesPage from "./pages/RoammatesPage";
+import RoammateProfilePage from "./pages/RoammateProfilePage";
+import RoammatesFeedPage from "./pages/RoammatesFeedPage";
 import SearchResultsPage from "./pages/SearchResultsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -30,6 +32,8 @@ const App = () => (
           <Route path="/journal/:id" element={<JournalEntryPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/roammates" element={<RoammatesPage />} />
+          <Route path="/roammate-profile/:userId" element={<RoammateProfilePage />} />
+          <Route path="/roammates-feed" element={<RoammatesFeedPage />} />
           <Route path="/search" element={<SearchResultsPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />

@@ -7,8 +7,11 @@ import { UserCheck, UserPlus, MessageSquare, MapPin, Star } from "lucide-react";
 import { formatDistance } from "date-fns";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from 'react-router-dom';
 
 const RoammateCard = ({ user, connectionStatus, onConnect, onAccept }) => {
+  const navigate = useNavigate();
+  
   // Helper to generate avatar fallback from name
   const generateInitials = (name) => {
     return name.split(' ').map(part => part[0]).join('').toUpperCase();
@@ -22,6 +25,8 @@ const RoammateCard = ({ user, connectionStatus, onConnect, onAccept }) => {
       title: "Message sent",
       description: `You've started a conversation with ${user.name}`,
     });
+    // Navigate to messages in a real app
+    navigate(`/messages/${user.id}`);
   };
   
   const handleIgnore = () => {
@@ -30,14 +35,18 @@ const RoammateCard = ({ user, connectionStatus, onConnect, onAccept }) => {
       description: `You've ignored the connection request from ${user.name}`,
     });
   };
+  
+  const handleProfileClick = () => {
+    navigate(`/roammate-profile/${user.id}`);
+  };
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow duration-300 border-muted/60">
       <CardContent className="p-0">
         <div className="h-16 bg-gradient-to-r from-primary/20 to-secondary/20"></div>
         <div className="px-4 pt-0 pb-4 relative">
-          <Avatar className="h-20 w-20 border-4 border-card absolute -top-10">
-            <AvatarImage src={user.avatar || '/placeholder.svg'} />
+          <Avatar className="h-20 w-20 border-4 border-background bg-white absolute -top-10">
+            <AvatarImage src={user.avatar || '/placeholder.svg'} alt={user.name} />
             <AvatarFallback className="text-lg bg-primary/10 text-primary">
               {generateInitials(user.name)}
             </AvatarFallback>
@@ -45,7 +54,7 @@ const RoammateCard = ({ user, connectionStatus, onConnect, onAccept }) => {
           
           <div className="pt-12 pb-2">
             <div className="flex justify-between items-start">
-              <h3 className="font-semibold text-lg">{user.name}</h3>
+              <h3 className="font-semibold text-lg cursor-pointer hover:text-primary" onClick={handleProfileClick}>{user.name}</h3>
               {user.isVerified && (
                 <Badge variant="outline" className="bg-primary/10 text-primary ml-2">
                   <Star size={12} className="mr-1" /> Pro
@@ -110,9 +119,13 @@ const RoammateCard = ({ user, connectionStatus, onConnect, onAccept }) => {
                     <MessageSquare size={16} className="mr-1" />
                     Message
                   </Button>
-                  <Button className="flex-1 rounded-full h-9 bg-primary" size="sm">
+                  <Button 
+                    className="flex-1 rounded-full h-9 bg-primary" 
+                    size="sm"
+                    onClick={handleProfileClick}
+                  >
                     <UserCheck size={16} className="mr-1" />
-                    Connected
+                    View Profile
                   </Button>
                 </>
               )}
@@ -130,10 +143,15 @@ const RoammateCard = ({ user, connectionStatus, onConnect, onAccept }) => {
               )}
               
               {connectionStatus === 'suggested' && (
-                <Button className="w-full rounded-full h-9" size="sm" onClick={onConnect}>
-                  <UserPlus size={16} className="mr-1" />
-                  Connect
-                </Button>
+                <>
+                  <Button variant="outline" className="flex-1 rounded-full h-9" size="sm" onClick={handleProfileClick}>
+                    View Profile
+                  </Button>
+                  <Button className="flex-1 rounded-full h-9" size="sm" onClick={onConnect}>
+                    <UserPlus size={16} className="mr-1" />
+                    Connect
+                  </Button>
+                </>
               )}
             </div>
           </div>

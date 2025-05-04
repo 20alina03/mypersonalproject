@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
+import { SendHorizontal } from "lucide-react";
 
 const CommentForm = ({ entryId, onCommentAdded }) => {
   const [comment, setComment] = useState('');
@@ -49,24 +50,30 @@ const CommentForm = ({ entryId, onCommentAdded }) => {
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 flex gap-3">
-      <Avatar className="h-8 w-8">
-        <AvatarImage src={currentUser.avatar} />
+      <Avatar className="h-8 w-8 bg-white">
+        <AvatarImage src={currentUser.avatar} alt={currentUser.name} />
         <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
       </Avatar>
-      <div className="flex-1">
+      <div className="flex-1 space-y-2">
         <Textarea
           placeholder="Share your thoughts..."
           value={comment}
           onChange={(e) => setComment(e.target.value)}
-          className="min-h-[80px] resize-none"
+          className="min-h-[80px] resize-none focus-visible:ring-primary"
         />
-        <div className="flex justify-end mt-2">
+        <div className="flex justify-end">
           <Button
             type="submit"
             disabled={isSubmitting || !comment.trim()}
             size="sm"
+            className="gap-1"
           >
-            {isSubmitting ? "Posting..." : "Post Comment"}
+            {isSubmitting ? "Posting..." : (
+              <>
+                <SendHorizontal size={16} />
+                Post Comment
+              </>
+            )}
           </Button>
         </div>
       </div>

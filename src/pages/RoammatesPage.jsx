@@ -1,16 +1,16 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import MainLayout from "@/components/layouts/MainLayout";
 import { users, roammates } from "@/utils/mockData";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search, UserPlus, UserCheck, Users } from "lucide-react";
+import { Search, UserPlus, UserCheck, Users, MapPin } from "lucide-react";
 import RoammateCard from "@/components/social/RoammateCard";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
+import { useNavigate } from 'react-router-dom';
 
 // Mock user for the current profile
 const currentUser = {
@@ -20,14 +20,48 @@ const currentUser = {
 };
 
 const RoammatesPage = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilters, setActiveFilters] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   
-  // Filter users based on search query
-  const filteredUsers = users.filter(user => 
-    user.id !== currentUser.id && 
-    (user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-    user.username.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  // Filter users based on search query and active filters
+  useEffect(() => {
+    let result = users.filter(user => 
+      user.id !== currentUser.id && 
+      (user.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      user.username?.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+    
+    if (activeFilters.includes('Same City')) {
+      result = result.filter(user => 
+        user.location && user.location.includes('San Francisco')
+      );
+    }
+    
+    if (activeFilters.includes('Similar Interests')) {
+      const currentUserInterests = users.find(u => u.id === currentUser.id)?.travelInterests || [];
+      result = result.filter(user => 
+        user.travelInterests?.some(interest => 
+          currentUserInterests.includes(interest)
+        )
+      );
+    }
+    
+    if (activeFilters.includes('Recently Active')) {
+      // Sort by most recent join date as a proxy for activity
+      result = [...result].sort((a, b) => 
+        new Date(b.joinedDate) - new Date(a.joinedDate)
+      );
+    }
+    
+    if (activeFilters.includes('Visited Same Places')) {
+      // Mock implementation - in a real app we'd check for overlap in visited places
+      result = result.filter(user => user.placesVisited > 15);
+    }
+    
+    setFilteredUsers(result);
+  }, [searchQuery, activeFilters]);
   
   const connectedRoammates = users.filter(user => 
     currentUser.roammatesData.roammates.includes(user.id)
@@ -61,6 +95,14 @@ const RoammatesPage = () => {
     });
   };
   
+  const toggleFilter = (filter) => {
+    if (activeFilters.includes(filter)) {
+      setActiveFilters(activeFilters.filter(f => f !== filter));
+    } else {
+      setActiveFilters([...activeFilters, filter]);
+    }
+  };
+  
   return (
     <MainLayout>
       <motion.div 
@@ -76,11 +118,9 @@ const RoammatesPage = () => {
               Connect with fellow travelers and share your journeys
             </p>
           </div>
-          <Button className="flex items-center gap-2" asChild>
-            <a href="/search?tab=people">
-              <UserPlus size={18} />
-              <span>Find Roammates</span>
-            </a>
+          <Button className="flex items-center gap-2" onClick={() => navigate('/search?tab=people')}>
+            <UserPlus size={18} />
+            <span>Find Roammates</span>
           </Button>
         </div>
         
@@ -101,10 +141,20 @@ const RoammatesPage = () => {
           </div>
           
           <div className="mt-4 flex flex-wrap gap-2">
-            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer">Same City</Badge>
-            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer">Similar Interests</Badge>
-            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer">Recently Active</Badge>
-            <Badge className="bg-primary/10 text-primary hover:bg-primary/20 cursor-pointer">Visited Same Places</Badge>
+            {['Same City', 'Similar Interests', 'Recently Active', 'Visited Same Places'].map((filter) => (
+              <Badge 
+                key={filter}
+                className={`${
+                  activeFilters.includes(filter) 
+                  ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
+                  : 'bg-primary/10 text-primary hover:bg-primary/20'
+                } cursor-pointer transition-colors`}
+                onClick={() => toggleFilter(filter)}
+              >
+                {filter === 'Same City' && <MapPin size={12} className="mr-1" />}
+                {filter}
+              </Badge>
+            ))}
           </div>
         </motion.div>
         
@@ -137,9 +187,7 @@ const RoammatesPage = () => {
                 <Users size={48} className="mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">No Roammates Yet</h3>
                 <p className="text-muted-foreground mb-4">Connect with other travelers to start sharing experiences</p>
-                <Button asChild>
-                  <a href="/search?tab=people">Find Roammates</a>
-                </Button>
+                <Button onClick={() => navigate('/search?tab=people')}>Find Roammates</Button>
               </motion.div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -208,6 +256,17 @@ const RoammatesPage = () => {
                   />
                 </motion.div>
               ))}
+              {suggestedRoammates.length === 0 && (
+                <motion.div 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="col-span-3 text-center py-12"
+                >
+                  <Users size={48} className="mx-auto text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No Suggested Roammates</h3>
+                  <p className="text-muted-foreground mb-4">Try changing your search filters</p>
+                </motion.div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
