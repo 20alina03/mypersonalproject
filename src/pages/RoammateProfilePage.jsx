@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MainLayout from "@/components/layouts/MainLayout";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
@@ -13,6 +12,7 @@ import { formatDistance } from 'date-fns';
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import CommentForm from "@/components/social/CommentForm";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const RoammateProfilePage = () => {
   const { userId } = useParams();
@@ -22,6 +22,8 @@ const RoammateProfilePage = () => {
   const [entryComments, setEntryComments] = useState({});
   const [likedPosts, setLikedPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showMessageDialog, setShowMessageDialog] = useState(false);
+  const [messageText, setMessageText] = useState("");
   
   useEffect(() => {
     setLoading(true);
@@ -76,13 +78,25 @@ const RoammateProfilePage = () => {
   
   const handleMessage = () => {
     if (!user) return;
+    setShowMessageDialog(true);
+  };
+  
+  const sendMessage = () => {
+    if (messageText.trim() === "") {
+      toast({
+        title: "Cannot send empty message",
+        description: "Please write a message before sending",
+        variant: "destructive",
+      });
+      return;
+    }
     
     toast({
-      title: "Message Started",
-      description: `You've started a conversation with ${user.name}`,
+      title: "Message Sent",
+      description: `Your message to ${user.name} has been sent`,
     });
-    // Navigate to messages in a real app
-    // navigate(`/messages/${userId}`);
+    setShowMessageDialog(false);
+    setMessageText("");
   };
   
   const handleLikePost = (postId) => {
@@ -230,9 +244,9 @@ const RoammateProfilePage = () => {
             <Button 
               variant="outline" 
               className="w-full" 
-              onClick={() => navigate('/roammates-feed')}
+              onClick={() => navigate('/roammates')}
             >
-              Back to Feed
+              Back to Roammates
             </Button>
           </div>
           
@@ -434,6 +448,34 @@ const RoammateProfilePage = () => {
             </Tabs>
           </div>
         </div>
+
+        {/* Message Dialog */}
+        <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Message to {user?.name}</DialogTitle>
+              <DialogDescription>
+                Send a direct message to start a conversation
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <textarea
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                placeholder="Write your message here..."
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowMessageDialog(false)}>
+                Cancel
+              </Button>
+              <Button type="button" onClick={sendMessage}>
+                Send Message
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </motion.div>
     </MainLayout>
   );

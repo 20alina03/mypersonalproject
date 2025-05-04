@@ -12,6 +12,7 @@ import RoammateCard from "@/components/social/RoammateCard";
 import { toast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { useNavigate } from 'react-router-dom';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 // Mock user for the current profile
 const currentUser = {
@@ -28,6 +29,10 @@ const RoammatesPage = () => {
   const [activeFilters, setActiveFilters] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [showMessageDialog, setShowMessageDialog] = useState(false);
+  const [messageRecipient, setMessageRecipient] = useState(null);
+  const [messageText, setMessageText] = useState("");
+  const [showFindRoammatesDialog, setShowFindRoammatesDialog] = useState(false);
   
   // Filter users based on search query and active filters
   useEffect(() => {
@@ -74,8 +79,11 @@ const RoammatesPage = () => {
           description: "Try adjusting your filters to see more people",
           duration: 3000,
         });
-        // Reset to all users if no results with filters
-        result = users.filter(user => user.id !== currentUser.id);
+      }
+      
+      // Always ensure we have some sample data for display
+      if (result.length === 0) {
+        result = users.filter(user => user.id !== currentUser.id).slice(0, 3);
       }
       
       setFilteredUsers(result);
@@ -132,6 +140,30 @@ const RoammatesPage = () => {
     });
   };
   
+  const handleMessage = (userId, userName) => {
+    const recipient = users.find(user => user.id === userId);
+    setMessageRecipient(recipient);
+    setShowMessageDialog(true);
+  };
+  
+  const sendMessage = () => {
+    if (messageText.trim() === "") {
+      toast({
+        title: "Cannot send empty message",
+        description: "Please write a message before sending",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    toast({
+      title: "Message Sent",
+      description: `Your message to ${messageRecipient.name} has been sent`,
+    });
+    setShowMessageDialog(false);
+    setMessageText("");
+  };
+  
   const toggleFilter = (filter) => {
     if (activeFilters.includes(filter)) {
       setActiveFilters(activeFilters.filter(f => f !== filter));
@@ -148,7 +180,12 @@ const RoammatesPage = () => {
   };
   
   const handleFindRoammates = () => {
+    setShowFindRoammatesDialog(true);
+  };
+  
+  const searchForRoammates = () => {
     navigate('/search?tab=people');
+    setShowFindRoammatesDialog(false);
     toast({
       title: "Finding Roammates",
       description: "Searching for compatible travel companions...",
@@ -157,15 +194,6 @@ const RoammatesPage = () => {
 
   const handleViewProfile = (userId) => {
     navigate(`/roammate-profile/${userId}`);
-  };
-
-  const handleMessage = (userId, userName) => {
-    toast({
-      title: "Message Started",
-      description: `Started a conversation with ${userName}`,
-    });
-    // Navigate to messages in a real app
-    // navigate(`/messages/${userId}`);
   };
   
   return (
@@ -319,6 +347,84 @@ const RoammatesPage = () => {
             </div>
           </TabsContent>
         </Tabs>
+        
+        {/* Message Dialog */}
+        <Dialog open={showMessageDialog} onOpenChange={setShowMessageDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Message to {messageRecipient?.name}</DialogTitle>
+              <DialogDescription>
+                Send a direct message to start a conversation
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <textarea
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                placeholder="Write your message here..."
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowMessageDialog(false)}>
+                Cancel
+              </Button>
+              <Button type="button" onClick={sendMessage}>
+                Send Message
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        
+        {/* Find Roammates Dialog */}
+        <Dialog open={showFindRoammatesDialog} onOpenChange={setShowFindRoammatesDialog}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Find New Roammates</DialogTitle>
+              <DialogDescription>
+                Discover travel companions based on your preferences
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium">Travel Interests</h3>
+                <div className="flex flex-wrap gap-2">
+                  {['Hiking', 'Photography', 'Food', 'Cultural', 'Adventure', 'Relaxation', 'Urban', 'Nature', 'Budget'].map(interest => (
+                    <Badge 
+                      key={interest} 
+                      variant="outline" 
+                      className="cursor-pointer hover:bg-primary/10"
+                    >
+                      {interest}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium">Location Preferences</h3>
+                <div className="flex flex-wrap gap-2">
+                  {['Same City', 'Same Country', 'Anywhere'].map(location => (
+                    <Badge 
+                      key={location} 
+                      variant="outline" 
+                      className="cursor-pointer hover:bg-primary/10"
+                    >
+                      {location}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowFindRoammatesDialog(false)}>
+                Cancel
+              </Button>
+              <Button type="button" onClick={searchForRoammates}>
+                Find Roammates
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </motion.div>
     </MainLayout>
   );

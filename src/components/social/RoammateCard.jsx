@@ -1,6 +1,5 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { UserCheck, UserPlus, MessageSquare, MapPin, Star } from "lucide-react";
@@ -9,11 +8,6 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/h
 import { toast } from "@/hooks/use-toast";
 
 const RoammateCard = ({ user, connectionStatus, onConnect, onAccept, onViewProfile, onMessage }) => {
-  // Helper to generate avatar fallback from name
-  const generateInitials = (name) => {
-    return name.split(' ').map(part => part[0]).join('').toUpperCase();
-  };
-
   // Determine shared interests to display (limit to 3)
   const displayInterests = user.travelInterests?.slice(0, 3) || [];
 
