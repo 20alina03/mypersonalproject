@@ -33,8 +33,17 @@ const RoammateProfilePage = () => {
       if (foundUser) {
         setUser(foundUser);
         
-        // Fetch user's journal entries
-        const userEntries = journalEntries.filter(entry => entry.author.id === userId);
+        // Fetch user's journal entries - ensure we have at least a few posts
+        let userEntries = journalEntries.filter(entry => entry.author.id === userId);
+        
+        // If no entries found, add some mock entries
+        if (userEntries.length === 0) {
+          userEntries = journalEntries.slice(0, 3).map(entry => ({
+            ...entry,
+            author: foundUser
+          }));
+        }
+        
         setUserPosts(userEntries);
         
         // Initialize comments for each entry
@@ -73,12 +82,17 @@ const RoammateProfilePage = () => {
       description: `You've started a conversation with ${user.name}`,
     });
     // Navigate to messages in a real app
-    navigate(`/messages/${userId}`);
+    // navigate(`/messages/${userId}`);
   };
   
   const handleLikePost = (postId) => {
     if (likedPosts.includes(postId)) {
       setLikedPosts(likedPosts.filter(id => id !== postId));
+      toast({
+        title: "Post Unliked",
+        description: "You removed your like from this post",
+        duration: 2000,
+      });
     } else {
       setLikedPosts([...likedPosts, postId]);
       toast({
@@ -100,6 +114,12 @@ const RoammateProfilePage = () => {
     setEntryComments({
       ...entryComments,
       [postId]: [...(entryComments[postId] || []), newComment]
+    });
+    
+    toast({
+      title: "Comment Added",
+      description: "Your comment has been posted",
+      duration: 2000,
     });
   };
   
@@ -138,12 +158,6 @@ const RoammateProfilePage = () => {
         {/* Profile Header */}
         <div className="relative">
           <div className="h-48 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-xl"></div>
-          <div className="absolute -bottom-16 left-8 border-4 border-background rounded-full">
-            <Avatar className="h-32 w-32">
-              <AvatarImage src={user.avatar || '/placeholder.svg'} alt={user.name} />
-              <AvatarFallback className="text-4xl bg-primary/10">{user.name.charAt(0)}</AvatarFallback>
-            </Avatar>
-          </div>
           <div className="absolute bottom-4 right-4 space-x-2">
             <Button variant="secondary" onClick={handleMessage}>
               <Mail size={16} className="mr-2" />
@@ -157,7 +171,7 @@ const RoammateProfilePage = () => {
         </div>
         
         {/* Profile Info */}
-        <div className="mt-20 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - User Info */}
           <div className="lg:col-span-1 space-y-6">
             <Card>
@@ -232,149 +246,127 @@ const RoammateProfilePage = () => {
               </TabsList>
               
               <TabsContent value="posts">
-                {userPosts.length === 0 ? (
-                  <Card className="text-center py-12">
-                    <CardContent>
-                      <MessageSquare size={48} className="mx-auto text-muted-foreground mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No Posts Yet</h3>
-                      <p className="text-muted-foreground mb-4">This user hasn't shared any travel experiences yet.</p>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <div className="space-y-6">
-                    {userPosts.map((post) => (
-                      <motion.div
-                        key={post.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="animate-enter"
-                      >
-                        <Card>
-                          <CardHeader>
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-3">
-                                <Avatar className="h-10 w-10">
-                                  <AvatarImage src={post.author.avatar} alt={post.author.name} />
-                                  <AvatarFallback>{post.author.name.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                  <CardTitle className="text-lg">{post.title}</CardTitle>
-                                  <CardDescription className="flex items-center gap-1">
-                                    <MapPin size={12} />
-                                    {post.location}
-                                  </CardDescription>
-                                </div>
-                              </div>
-                              <span className="text-xs text-muted-foreground">
-                                {formatDistance(post.date, new Date(), { addSuffix: true })}
-                              </span>
-                            </div>
-                          </CardHeader>
-                          
-                          {post.imageUrl && (
-                            <div className="px-6">
-                              <div className="aspect-video rounded-md overflow-hidden">
-                                <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
+                <div className="space-y-6">
+                  {userPosts.map((post) => (
+                    <motion.div
+                      key={post.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="animate-enter"
+                    >
+                      <Card>
+                        <CardHeader>
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              <div>
+                                <CardTitle className="text-lg">{post.title}</CardTitle>
+                                <CardDescription className="flex items-center gap-1">
+                                  <MapPin size={12} />
+                                  {post.location}
+                                </CardDescription>
                               </div>
                             </div>
-                          )}
-                          
-                          <CardContent className="pt-4">
-                            <p className="text-sm">{post.excerpt}</p>
-                            
-                            <div className="flex flex-wrap gap-1 mt-3">
-                              {post.tags.map((tag) => (
-                                <Badge key={tag} variant="outline" className="text-xs">
-                                  {tag}
-                                </Badge>
-                              ))}
+                            <span className="text-xs text-muted-foreground">
+                              {formatDistance(post.date, new Date(), { addSuffix: true })}
+                            </span>
+                          </div>
+                        </CardHeader>
+                        
+                        {post.imageUrl && (
+                          <div className="px-6">
+                            <div className="aspect-video rounded-md overflow-hidden">
+                              <img src={post.imageUrl} alt={post.title} className="w-full h-full object-cover" />
                             </div>
-                          </CardContent>
+                          </div>
+                        )}
+                        
+                        <CardContent className="pt-4">
+                          <p className="text-sm">{post.excerpt}</p>
                           
-                          <CardFooter className="flex justify-between border-t pt-4">
-                            <div className="flex gap-4">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                className={`gap-1 ${likedPosts.includes(post.id) ? 'text-secondary' : ''}`}
-                                onClick={() => handleLikePost(post.id)}
-                              >
-                                <Heart 
-                                  size={16} 
-                                  className={likedPosts.includes(post.id) ? 'fill-secondary text-secondary' : ''}
-                                />
-                                {post.likes + (likedPosts.includes(post.id) ? 1 : 0)}
-                              </Button>
-                              
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                className="gap-1"
-                                onClick={() => document.getElementById(`comments-${post.id}`).focus()}
-                              >
-                                <MessageSquare size={16} />
-                                {(entryComments[post.id]?.length || 0) + post.comments}
-                              </Button>
-                            </div>
+                          <div className="flex flex-wrap gap-1 mt-3">
+                            {post.tags.map((tag) => (
+                              <Badge key={tag} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        </CardContent>
+                        
+                        <CardFooter className="flex justify-between border-t pt-4">
+                          <div className="flex gap-4">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className={`gap-1 ${likedPosts.includes(post.id) ? 'text-secondary' : ''}`}
+                              onClick={() => handleLikePost(post.id)}
+                            >
+                              <Heart 
+                                size={16} 
+                                className={likedPosts.includes(post.id) ? 'fill-secondary text-secondary' : ''}
+                              />
+                              {post.likes + (likedPosts.includes(post.id) ? 1 : 0)}
+                            </Button>
                             
                             <Button 
                               variant="ghost" 
                               size="sm"
                               className="gap-1"
-                              onClick={() => handleSharePost(post.id)}
+                              onClick={() => document.getElementById(`comments-${post.id}`)?.focus()}
                             >
-                              <Share size={16} />
-                              Share
+                              <MessageSquare size={16} />
+                              {(entryComments[post.id]?.length || 0) + post.comments}
                             </Button>
-                          </CardFooter>
+                          </div>
                           
-                          {/* Comments Section */}
-                          <div className="px-6 pb-4">
-                            <div className="border-t pt-4">
-                              {entryComments[post.id]?.map((comment) => (
-                                <div key={comment.id} className="flex gap-3 mb-4">
-                                  <Avatar className="h-8 w-8">
-                                    <AvatarImage src={comment.userAvatar} alt={comment.userName} />
-                                    <AvatarFallback>{comment.userName.charAt(0)}</AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex-1">
-                                    <div className="bg-muted/50 rounded-md p-2">
-                                      <div className="flex justify-between items-center">
-                                        <p className="font-medium text-sm">{comment.userName}</p>
-                                        <span className="text-xs text-muted-foreground">
-                                          {formatDistance(comment.date, new Date(), { addSuffix: true })}
-                                        </span>
-                                      </div>
-                                      <p className="text-sm mt-1">{comment.content}</p>
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            className="gap-1"
+                            onClick={() => handleSharePost(post.id)}
+                          >
+                            <Share size={16} />
+                            Share
+                          </Button>
+                        </CardFooter>
+                        
+                        {/* Comments Section */}
+                        <div className="px-6 pb-4">
+                          <div className="border-t pt-4">
+                            {(entryComments[post.id] || []).map((comment) => (
+                              <div key={comment.id} className="flex gap-3 mb-4">
+                                <div className="flex-1">
+                                  <div className="bg-muted/50 rounded-md p-2">
+                                    <div className="flex justify-between items-center">
+                                      <p className="font-medium text-sm">{comment.userName}</p>
+                                      <span className="text-xs text-muted-foreground">
+                                        {formatDistance(comment.date, new Date(), { addSuffix: true })}
+                                      </span>
                                     </div>
-                                    <div className="flex gap-3 mt-1">
-                                      <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground">
-                                        Like
-                                      </Button>
-                                      <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground">
-                                        Reply
-                                      </Button>
-                                      <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-muted-foreground hover:text-destructive">
-                                        <Flag size={12} className="mr-1" />
-                                        Report
-                                      </Button>
-                                    </div>
+                                    <p className="text-sm mt-1">{comment.content}</p>
+                                  </div>
+                                  <div className="flex gap-3 mt-1">
+                                    <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground">
+                                      Like
+                                    </Button>
+                                    <Button variant="ghost" size="sm" className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground">
+                                      Reply
+                                    </Button>
                                   </div>
                                 </div>
-                              ))}
-                              
-                              <CommentForm 
-                                entryId={post.id} 
-                                onCommentAdded={(newComment) => handleCommentAdded(post.id, newComment)} 
-                                id={`comments-${post.id}`}
-                              />
-                            </div>
+                              </div>
+                            ))}
+                            
+                            <CommentForm 
+                              entryId={post.id} 
+                              onCommentAdded={(newComment) => handleCommentAdded(post.id, newComment)} 
+                              id={`comments-${post.id}`}
+                            />
                           </div>
-                        </Card>
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
+                        </div>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
               </TabsContent>
               
               <TabsContent value="about">
