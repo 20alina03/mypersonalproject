@@ -1,12 +1,15 @@
+
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { MapPin, Book, Map, Users, Compass, Globe, Mountain } from "lucide-react";
 import MainLayout from "@/components/layouts/MainLayout";
 import JournalGrid from "@/components/journal/JournalGrid";
+import DailyTip from "@/components/travel/DailyTip";
 import { motion } from "framer-motion";
+import { mockCurrentUser, mockTravelTips } from "@/lib/mockData";
 
 const Index = () => {
-  const isLoggedIn = false;
+  const isLoggedIn = true; // Mock authenticated state
 
   const features = [
     {
@@ -38,23 +41,36 @@ const Index = () => {
   if (isLoggedIn) {
     return (
       <MainLayout>
-        <section className="container py-6 space-y-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="container py-6 space-y-8">
+          {/* Welcome Section */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 bg-gradient-to-br from-atlas-navy/10 to-atlas-teal/5 p-6 rounded-xl">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Your Travel Feed</h1>
-              <p className="text-muted-foreground">
-                Discover travel stories from people you follow
+              <h1 className="text-3xl font-bold tracking-tight">
+                Welcome back, {mockCurrentUser.name}! 👋
+              </h1>
+              <p className="text-muted-foreground mt-2">
+                {mockCurrentUser.location}
               </p>
             </div>
             <Button asChild>
-              <Link to="/journal/new">
-                Create New Journal Entry
-              </Link>
+              <Link to="/journal/new">Create New Memory</Link>
             </Button>
           </div>
 
-          <JournalGrid />
-        </section>
+          {/* Daily Tip Section */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="md:col-span-2">
+              <h2 className="text-2xl font-semibold mb-4">Your Travel Feed</h2>
+              <JournalGrid />
+            </div>
+            <div className="space-y-6">
+              <h2 className="text-2xl font-semibold">Today's Tips</h2>
+              {mockTravelTips.map((tip) => (
+                <DailyTip key={tip.id} tip={tip} />
+              ))}
+            </div>
+          </div>
+        </div>
       </MainLayout>
     );
   }
