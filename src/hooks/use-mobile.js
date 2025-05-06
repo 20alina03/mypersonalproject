@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 
-export function useMobile() {
+export function useIsMobile() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -21,6 +20,11 @@ export function useMobile() {
   }, []);
 
   return isMobile;
+}
+
+// Keep the old export name for backward compatibility
+export function useMobile() {
+  return useIsMobile();
 }
 
 export default useMobile;

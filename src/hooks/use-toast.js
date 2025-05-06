@@ -1,6 +1,6 @@
 
 // Copied from shadcn/ui toast component
-import { useToast as useToastOriginal, toast as toastOriginal } from "@/hooks/use-toast";
+import { useToast as useToastOriginal, toast as toastOriginal } from "@/components/ui/use-toast";
 
 export const useToast = useToastOriginal;
 export const toast = toastOriginal;
